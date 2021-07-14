@@ -5,6 +5,7 @@ using Quillser.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Quillser.Controller
 {
@@ -20,17 +21,17 @@ namespace Quillser.Controller
         }
 
         [HttpGet]
-        public IEnumerable<ItemDTO> GetItems()
+        public async Task<IEnumerable<ItemDTO>> GetItemsAsync()
         {
-            var items = _repository.GetItems().Select(item => item.AsDTO());
+            var items = (await _repository.GetItemsAsync()).Select(item => item.AsDTO());
 
             return items;
         }
 
         [HttpGet("{id}")]
-        public ActionResult<ItemDTO> GetItem(Guid id)
+        public async Task<ActionResult<ItemDTO>> GetItemAsync(Guid id)
         {
-            var item = _repository.GetItem(id);
+            var item = await _repository.GetItemAsync(id);
 
             if (item is null)
             {
@@ -40,7 +41,7 @@ namespace Quillser.Controller
         }
 
         [HttpPost]
-        public ActionResult<ItemDTO> CreateItem(CreateItemDTO itemDto)
+        public async Task<ActionResult<ItemDTO>> CreateItemAsync(CreateItemDTO itemDto)
         {
             Item item = new()
             {
@@ -50,14 +51,14 @@ namespace Quillser.Controller
                 CreatedDate = DateTimeOffset.UtcNow
             };
 
-            _repository.CreateItem(item);
-            return CreatedAtAction(nameof(GetItem), new { id = item.Id }, item.AsDTO());
+            await _repository.CreateItemAsync(item);
+            return CreatedAtAction(nameof(GetItemAsync), new { id = item.Id }, item.AsDTO());
         }
 
         [HttpPut("{id}")]
-        public ActionResult UpdateItem(Guid id, UpdateItemDTO itemDto)
+        public async Task<ActionResult> UpdateItemAsync(Guid id, UpdateItemDTO itemDto)
         {
-            var existingItem = _repository.GetItem(id);
+            var existingItem = await _repository.GetItemAsync(id);
 
             if (existingItem is null)
             {
@@ -70,22 +71,22 @@ namespace Quillser.Controller
                 Price = itemDto.Price
             };
 
-            _repository.UpdateItem(updatedItem);
+            await _repository.UpdateItemAsync(updatedItem);
 
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public ActionResult DeleteItem(Guid id)
+        public async Task<ActionResult> DeleteItemAsync(Guid id)
         {
-            var existingItem = _repository.GetItem(id);
+            var existingItem = await _repository.GetItemAsync(id);
 
             if (existingItem is null)
             {
                 return NotFound();
             }
 
-            _repository.DeleteItem(id);
+            await _repository.DeleteItemAsync(id);
 
             return NoContent();
         }

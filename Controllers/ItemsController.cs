@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Quillser.DTOs;
 using Quillser.Entities;
 using Quillser.Repositories;
@@ -14,16 +15,21 @@ namespace Quillser.Controller
     public class ItemsController : ControllerBase
     {
         private readonly IRepository _repository;
+        private readonly ILogger<ItemsController> _logger;
 
-        public ItemsController(IRepository repository)
+
+        public ItemsController(IRepository repository, ILogger<ItemsController> logger)
         {
             _repository = repository;
+            _logger = logger;
         }
 
         [HttpGet]
         public async Task<IEnumerable<ItemDTO>> GetItemsAsync()
         {
             var items = (await _repository.GetItemsAsync()).Select(item => item.AsDTO());
+
+            _logger.LogInformation($"{DateTime.UtcNow.ToString("hh:mm:ss")} : Retreived {items.Count()} items");
 
             return items;
         }
